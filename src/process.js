@@ -22,7 +22,8 @@ module.exports = function(command, errorParser, successParser) {
     var deferred = Q.defer();
 
     sc.on('exit', function(code) { 
-        if (code !== 0) deferred.reject(errorParser(stdout));
+        if (code !== 0 && command.successCodes.indexOf(code) == -1) 
+            deferred.reject(errorParser(stdout));
         else if (successParser) deferred.resolve(successParser(stdout));
         else deferred.resolve();
     });

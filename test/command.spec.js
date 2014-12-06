@@ -3,8 +3,8 @@ var expect = require('chai').expect,
 
 describe('command', function() {
 
-    var buildCommand = function(args, service) {
-        var command = { path: 'sc', args: args };
+    var buildCommand = function(args, service, successCodes) {
+        var command = { path: 'sc', args: args, successCodes: successCodes || [] };
         if (service) command.service = service;
         return command;
     };
@@ -24,7 +24,7 @@ describe('command', function() {
             var start = command.start(['servicename']);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
-                buildCommand([ 'start', 'servicename' ], 'servicename') 
+                buildCommand([ 'start', 'servicename' ], 'servicename', [ 1056 ]) 
             ]));
 
         });
@@ -34,8 +34,8 @@ describe('command', function() {
             var start = command.start([['servicename1', 'servicename2']]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
-                buildCommand([ 'start', 'servicename1' ], 'servicename1'),
-                buildCommand([ 'start', 'servicename2' ], 'servicename2')
+                buildCommand([ 'start', 'servicename1' ], 'servicename1', [ 1056 ]),
+                buildCommand([ 'start', 'servicename2' ], 'servicename2', [ 1056 ])
             ]));
 
         });
@@ -45,7 +45,7 @@ describe('command', function() {
             var start = command.start(['myserver', 'servicename', { serial: true }]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
-                buildCommand([ '\\\\myserver', 'start', 'servicename' ], 'servicename')
+                buildCommand([ '\\\\myserver', 'start', 'servicename' ], 'servicename', [ 1056 ])
             ], 'myserver', true));
 
         });
@@ -55,8 +55,8 @@ describe('command', function() {
             var start = command.start(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
-                buildCommand([ '\\\\myserver', 'start', 'servicename1' ], 'servicename1'),
-                buildCommand([ '\\\\myserver', 'start', 'servicename2' ], 'servicename2')
+                buildCommand([ '\\\\myserver', 'start', 'servicename1' ], 'servicename1', [ 1056 ]),
+                buildCommand([ '\\\\myserver', 'start', 'servicename2' ], 'servicename2', [ 1056 ])
             ], 'myserver', true));
 
         });
@@ -69,7 +69,7 @@ describe('command', function() {
 
             expect(start).to.deep.equal(buildControlCommand('start', [
                 buildCommand([ '\\\\myserver', 'start', 'servicename', 'Service', 'Arguments' ], 
-                               'servicename')
+                               'servicename', [ 1056 ])
             ], 'myserver', true));
 
         });
@@ -82,9 +82,9 @@ describe('command', function() {
 
             expect(start).to.deep.equal(buildControlCommand('start', [
                 buildCommand([ '\\\\myserver', 'start', 'servicename1', 'Service', 'Arguments' ], 
-                               'servicename1', 'myserver'),
+                               'servicename1', [ 1056 ]),
                 buildCommand([ '\\\\myserver', 'start', 'servicename2', 'Service', 'Arguments' ], 
-                               'servicename2')
+                               'servicename2', [ 1056 ])
             ], 'myserver', true));
 
         });
@@ -190,7 +190,7 @@ describe('command', function() {
             var stop = command.stop(['servicename']);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
-                buildCommand([ 'stop', 'servicename' ], 'servicename')
+                buildCommand([ 'stop', 'servicename' ], 'servicename', [ 1062 ])
             ]));
 
         });
@@ -200,8 +200,8 @@ describe('command', function() {
             var stop = command.stop([['servicename1', 'servicename2']]);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
-                buildCommand([ 'stop', 'servicename1' ], 'servicename1'),
-                buildCommand([ 'stop', 'servicename2' ], 'servicename2')
+                buildCommand([ 'stop', 'servicename1' ], 'servicename1', [ 1062 ]),
+                buildCommand([ 'stop', 'servicename2' ], 'servicename2', [ 1062 ])
             ]));
 
         });
@@ -211,7 +211,7 @@ describe('command', function() {
             var stop = command.stop(['myserver', 'servicename', { serial: true }]);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
-                buildCommand([ '\\\\myserver', 'stop', 'servicename' ], 'servicename')
+                buildCommand([ '\\\\myserver', 'stop', 'servicename' ], 'servicename', [ 1062 ])
             ], 'myserver', true));
 
         });
@@ -221,8 +221,8 @@ describe('command', function() {
             var stop = command.stop(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
-                buildCommand([ '\\\\myserver', 'stop', 'servicename1' ], 'servicename1'),
-                buildCommand([ '\\\\myserver', 'stop', 'servicename2' ], 'servicename2')
+                buildCommand([ '\\\\myserver', 'stop', 'servicename1' ], 'servicename1', [ 1062 ]),
+                buildCommand([ '\\\\myserver', 'stop', 'servicename2' ], 'servicename2', [ 1062 ])
             ], 'myserver', true));
 
         });

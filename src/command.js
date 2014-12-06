@@ -20,7 +20,7 @@ function getArgs(args, fixed) {
     return argsOut;
 }
 
-function buildCommand(commandName, server, argsIn) {
+function buildCommand(commandName, server, argsIn, successCodes) {
     var argsOut = [];
     if (server) argsOut.push(qualifyUNCPath(server));
     argsOut.push(commandName);
@@ -31,7 +31,8 @@ function buildCommand(commandName, server, argsIn) {
     }
     return {
         path: 'sc',
-        args: argsOut
+        args: argsOut,
+        successCodes: successCodes || []
     };
 }
 
@@ -55,7 +56,7 @@ function toSlashSeperated(value) {
     return value ? value.join('/') : value;
 }
 
-function buildControlCommand(args, commandName) {
+function buildControlCommand(args, commandName, successCodes) {
     var argsIn = getArgs(args, 2);
     var services = _.isArray(argsIn.args[0]) ? argsIn.args[0] : [ argsIn.args[0] ];
 
@@ -65,7 +66,7 @@ function buildControlCommand(args, commandName) {
         commands: services.map(function(service) {
             var argsOut = [ service ];
             if (argsIn.options.args) argsOut.push.apply(argsOut, argsIn.options.args);
-            var command = buildCommand(commandName, argsIn.server, argsOut);
+            var command = buildCommand(commandName, argsIn.server, argsOut, successCodes);
             command.service = service;
             return command;
         })
@@ -91,7 +92,7 @@ function addConfigArgs(args, options) {
 // ********** Control *******************
 
 exports.start = function(args) {
-    return buildControlCommand(args, 'start');
+    return buildControlCommand(args, 'start', [ 1056 ]);
 };
 
 exports.pause = function(args) {
@@ -103,7 +104,7 @@ exports.continue = function(args) {
 };
 
 exports.stop = function(args) {
-    return buildControlCommand(args, 'stop');
+    return buildControlCommand(args, 'stop', [ 1062 ]);
 };
 
 exports.control = function(args) {

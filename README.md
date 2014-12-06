@@ -34,6 +34,38 @@ sc.start('MyService');
 sc.start('MyServer', 'MyService');
 ```
 
+## Commands
+
+All `sc` commands are fully supported by this module.
+
+- [Control Commands](#control-commands)
+  - [Timeout](#timeout)
+  - [Start](#start)
+  - [Pause](#pause)
+  - [Continue](#continue)
+  - [Stop](#stop)
+  - [Control](#control)
+  - [Interrogate](#interrogate)
+- [Management Commands](#management-commands)
+  - [Create](#create)
+  - [Get Display Name](#get-display-name)
+  - [Get Key Name](#get-key-name)
+  - [Get Description](#get-description)
+  - [Set Description](#set-description)
+  - [Get Dependencies](#get-dependencies)
+  - [Get Security Descriptor](#get-security-descriptor)
+  - [Set Security Descriptor](#set-security-descriptor)
+  - [Get Configuration](#get-configuration)
+  - [Set Configuration](#set-configuration)
+  - [Get Failure Configuration](#get-failure-configuration)
+  - [Set Failure Configuration](#set-failure-configuration)
+  - [Query](#query)
+  - [Delete](#delete)
+- [System Commands](#system-commands)
+  - [Set Boot](#set-boot)
+  - [Lock](#lock)
+  - [Get Lock](#get-lock)
+
 ## Control Commands
 
 Unlike the rest of the commands, `start`, `pause`, `continue` and `stop` do not resolve until the service state has changed or the timeout has been reached.
