@@ -18,8 +18,8 @@ All commands return a promise. Information returned by the `sc` command, if any,
 var sc = require('windows-service-controller');
 
 sc.getDisplayName('SomeService')
-    .catch(function(errorMessage) { 
-        console.log(errorMessage);
+    .catch(function(error) { 
+        console.log(error.message);
     })
     .done(function(displayName) { 
         console.log('Display name: ' + displayName); 

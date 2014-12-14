@@ -23,7 +23,7 @@ module.exports = function(command, errorParser, successParser) {
 
     sc.on('exit', function(code) { 
         if (code !== 0 && command.successCodes.indexOf(code) == -1) 
-            deferred.reject(errorParser(stdout));
+            deferred.reject(new Error(errorParser(stdout)));
         else if (successParser) deferred.resolve(successParser(stdout));
         else deferred.resolve();
     });
