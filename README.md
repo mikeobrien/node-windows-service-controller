@@ -1,6 +1,6 @@
 # windows-service-controller
 
-[![npm version](http://img.shields.io/npm/v/windows-service-controller.svg)](https://npmjs.org/package/windows-service-controller) [![build status](http://img.shields.io/travis/mikeobrien/node-windows-service-controller.svg)](https://travis-ci.org/mikeobrien/node-windows-service-controller) [![Dependency Status](http://img.shields.io/david/mikeobrien/node-windows-service-controller.svg)](https://david-dm.org/mikeobrien/node-windows-service-controller) [![npm downloads](http://img.shields.io/npm/dm/windows-service-controller.svg)](https://npmjs.org/package/windows-service-controller)
+[![npm version](http://img.shields.io/npm/v/windows-service-controller.svg?style=flat)](https://npmjs.org/package/windows-service-controller) [![build status](http://img.shields.io/travis/mikeobrien/node-windows-service-controller.svg?style=flat)](https://travis-ci.org/mikeobrien/node-windows-service-controller) [![Dependency Status](http://img.shields.io/david/mikeobrien/node-windows-service-controller.svg?style=flat)](https://david-dm.org/mikeobrien/node-windows-service-controller) [![npm downloads](http://img.shields.io/npm/dm/windows-service-controller.svg?style=flat)](https://npmjs.org/package/windows-service-controller)
 
 Windows service controller for node. Wraps [sc](http://technet.microsoft.com/en-us/library/bb490995.aspx).
 
