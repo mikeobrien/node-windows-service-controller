@@ -1,11 +1,17 @@
-var command = require('./command'),
-    parse = require('./parser'),
+var sc = require('./sc-command'),
+    tasklist = require('./tasklist-command'),
+    scParser = require('./sc-parser'),
+    tasklistParser = require('./tasklist-parser'),
     process = require('./process'),
     coordinator = require('./coordinator'),
     Q = require('q');
 
-function run(command, successParser) {
-    return process(command, parse.error, successParser);
+function runSc(command, successParser) {
+    return process(command, scParser.error, successParser);
+}
+
+function runTasklist(command, successParser) {
+    return process(command, function(x) { return x; }, tasklistParser);
 }
 
 // *************************** CONTROL ***************************
@@ -14,114 +20,132 @@ var PAUSED = 7;
 var RUNNING = 4;
 var STOPPED = 1;
 
-var _timeout = 30;
+var timeout = 30000;
+var pollInterval = 1000;
 
-function runControl(control, status) {
-    return coordinator.poll(control.commands, 1000, _timeout * 1000, control.serial,
-        function(command) { return run(command); },
-        function(command) { return query(control.server, { name: command.service }); },
-        function(services) { return services[0].state.code === status; },
-        function(command) { return 'Timed out attempting to ' + control.command + ' ' + command.service + '.'; });
+function runPoll(control, poll, predicate, errorMessage) {
+    return coordinator.poll(
+        control.commands, pollInterval, timeout, control.serial,
+        function(command) { return runSc(command); },
+        poll, predicate, errorMessage);
 }
 
-module.exports.timeout = function(timeout) {
-    _timeout = timeout;
+function runControl(control, status) {
+    return runPoll(control,
+        function(command) { return query(control.server, { name: command.service }); },
+        function(services) { return services[0].state.code === status; },
+        function(command) { return 'Timed out attempting to ' + 
+            control.command + ' ' + command.service + '.'; });
+}
+
+module.exports.timeout = function(second) {
+    timeout = second * 1000;
+};
+
+module.exports.pollInterval = function(second) {
+    pollInterval = second * 1000;
 };
 
 module.exports.start = function() {
-    return runControl(command.start(arguments), RUNNING);
+    return runControl(sc.start(arguments), RUNNING);
 };
 
 module.exports.pause = function() {
-    return runControl(command.pause(arguments), PAUSED);
+    return runControl(sc.pause(arguments), PAUSED);
 };
 
 module.exports.continue = function() {
-    return runControl(command.continue(arguments), RUNNING);
+    return runControl(sc.continue(arguments), RUNNING);
 };
 
 module.exports.stop = function() {
-    return runControl(command.stop(arguments), STOPPED);
+    var command = sc.stop(arguments);
+    if (!command.waitForExit) return runControl(command, STOPPED);
+    return runPoll(command,
+        function(command) { return runTasklist(tasklist(command.service, command.server)); },
+        function(processes) { return processes.length == 0; },
+        function(command) { return 'Timed out waiting for the ' + 
+            command.service + ' service process to terminate.'; });
 };
 
 module.exports.control = function() {
-    return run(command.control(arguments));
+    return runSc(sc.control(arguments));
 };
 
 module.exports.interrogate = function() {
-    return run(command.interrogate(arguments));
+    return runSc(sc.interrogate(arguments));
 };
 
 // *************************** MANAGEMENT ***************************
 
 module.exports.create = function() {
-    return run(command.create(arguments));
+    return runSc(sc.create(arguments));
 };
 
 module.exports.getDisplayName = function() {
-    return run(command.getDisplayName(arguments), parse.displayName);
+    return runSc(sc.getDisplayName(arguments), scParser.displayName);
 };
 
 module.exports.getKeyName = function() {
-    return run(command.getKeyName(arguments), parse.keyName);
+    return runSc(sc.getKeyName(arguments), scParser.keyName);
 };
 
 module.exports.getDescription = function() {
-    return run(command.getDescription(arguments), parse.description);
+    return runSc(sc.getDescription(arguments), scParser.description);
 };
 
 module.exports.setDescription = function() {
-    return run(command.setDescription(arguments));
+    return runSc(sc.setDescription(arguments));
 };
 
 module.exports.getDependencies = function() {
-    return run(command.getDependencies(arguments), parse.services);
+    return runSc(sc.getDependencies(arguments), scParser.services);
 };
 
 module.exports.getDescriptor = function() {
-    return run(command.getDescriptor(arguments), parse.descriptor);
+    return runSc(sc.getDescriptor(arguments), scParser.descriptor);
 };
 
 module.exports.setDescriptor = function() {
-    return run(command.setDescriptor(arguments));
+    return runSc(sc.setDescriptor(arguments));
 };
 
 module.exports.getConfig = function() {
-    return run(command.getConfig(arguments), parse.config);
+    return runSc(sc.getConfig(arguments), scParser.config);
 };
 
 module.exports.setConfig = function() {
-    return run(command.setConfig(arguments));
+    return runSc(sc.setConfig(arguments));
 };
 
 module.exports.getFailureConfig = function() {
-    return run(command.getFailureConfig(arguments), parse.failureConfig);
+    return runSc(sc.getFailureConfig(arguments), scParser.failureConfig);
 };
 
 module.exports.setFailureConfig = function() {
-    return run(command.setFailureConfig(arguments));
+    return runSc(sc.setFailureConfig(arguments));
 };
 
 function query() {
-    return run(command.query(arguments), parse.services);
+    return runSc(sc.query(arguments), scParser.services);
 };
 
 module.exports.query = query;
 
 module.exports.delete = function() {
-    return run(command.delete(arguments));
+    return runSc(sc.delete(arguments));
 };
 
 // *************************** SYSTEM ***************************
 
 module.exports.setBoot = function() {
-    return run(command.setBoot(arguments));
+    return runSc(sc.setBoot(arguments));
 };
 
 module.exports.lock = function() {
-    return run(command.lock(arguments));
+    return runSc(sc.lock(arguments));
 };
 
 module.exports.getLock = function() {
-    return run(command.getLock(arguments), parse.lock);
+    return runSc(sc.getLock(arguments), scParser.lock);
 };

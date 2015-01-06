@@ -1,18 +1,20 @@
 var expect = require('chai').expect,
-    command = require('../src/command.js');
+    _ = require('lodash'),
+    sc = require('../../src/sc-command');
 
-describe('command', function() {
+describe('sc-command', function() {
 
-    var buildCommand = function(args, service, successCodes) {
+    var buildCommand = function(args, service, successCodes, server) {
         var command = { path: 'sc', args: args, successCodes: successCodes || [] };
         if (service) command.service = service;
+        if (server) command.server = server;
         return command;
     };
 
     // *************************** CONTROL ***************************
 
-    var buildControlCommand = function(commandName, commands, server, serial) {
-        var command = { command: commandName, serial: !!serial, commands: commands };
+    var buildControlCommand = function(commandName, commands, server, options) {
+        var command = _.merge({ command: commandName, commands: commands }, options);
         if (server) command.server = server;
         return command;
     };
@@ -21,7 +23,7 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            var start = command.start(['servicename']);
+            var start = sc.start(['servicename']);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
                 buildCommand([ 'start', 'servicename' ], 'servicename', [ 1056 ]) 
@@ -31,7 +33,7 @@ describe('command', function() {
 
         it('should be valid with minimal args and multiple services', function() {
 
-            var start = command.start([['servicename1', 'servicename2']]);
+            var start = sc.start([['servicename1', 'servicename2']]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
                 buildCommand([ 'start', 'servicename1' ], 'servicename1', [ 1056 ]),
@@ -42,50 +44,50 @@ describe('command', function() {
 
         it('should be valid with server and minimal args', function() {
 
-            var start = command.start(['myserver', 'servicename', { serial: true }]);
+            var start = sc.start(['myserver', 'servicename', { serial: true }]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
-                buildCommand([ '\\\\myserver', 'start', 'servicename' ], 'servicename', [ 1056 ])
-            ], 'myserver', true));
+                buildCommand([ '\\\\myserver', 'start', 'servicename' ], 'servicename', [ 1056 ], 'myserver')
+            ], 'myserver', { serial: true }));
 
         });
 
         it('should be valid with server and minimal args and multiple services', function() {
 
-            var start = command.start(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
+            var start = sc.start(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
-                buildCommand([ '\\\\myserver', 'start', 'servicename1' ], 'servicename1', [ 1056 ]),
-                buildCommand([ '\\\\myserver', 'start', 'servicename2' ], 'servicename2', [ 1056 ])
-            ], 'myserver', true));
+                buildCommand([ '\\\\myserver', 'start', 'servicename1' ], 'servicename1', [ 1056 ], 'myserver'),
+                buildCommand([ '\\\\myserver', 'start', 'servicename2' ], 'servicename2', [ 1056 ], 'myserver')
+            ], 'myserver', { serial: true }));
 
         });
 
         it('should be valid with all args', function() {
 
-            var start = command.start(['myserver', 'servicename', {
+            var start = sc.start(['myserver', 'servicename', {
                 args: ['Service', 'Arguments'], serial: true
             }]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
                 buildCommand([ '\\\\myserver', 'start', 'servicename', 'Service', 'Arguments' ], 
-                               'servicename', [ 1056 ])
-            ], 'myserver', true));
+                               'servicename', [ 1056 ], 'myserver')
+            ], 'myserver', { args: ['Service', 'Arguments'], serial: true }));
 
         });
 
         it('should be valid with all args and multiple services', function() {
 
-            var start = command.start(['myserver', ['servicename1', 'servicename2'], {
+            var start = sc.start(['myserver', ['servicename1', 'servicename2'], {
                 args: ['Service', 'Arguments'], serial: true
             }]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
                 buildCommand([ '\\\\myserver', 'start', 'servicename1', 'Service', 'Arguments' ], 
-                               'servicename1', [ 1056 ]),
+                               'servicename1', [ 1056 ], 'myserver'),
                 buildCommand([ '\\\\myserver', 'start', 'servicename2', 'Service', 'Arguments' ], 
-                               'servicename2', [ 1056 ])
-            ], 'myserver', true));
+                               'servicename2', [ 1056 ], 'myserver')
+            ], 'myserver', { args: ['Service', 'Arguments'], serial: true }));
 
         });
 
@@ -95,7 +97,7 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            var pause = command.pause(['servicename']);
+            var pause = sc.pause(['servicename']);
 
             expect(pause).to.deep.equal(buildControlCommand('pause', [
                 buildCommand([ 'pause', 'servicename' ], 'servicename')
@@ -105,7 +107,7 @@ describe('command', function() {
 
         it('should be valid with minimal args and multiple services', function() {
 
-            var pause = command.pause([['servicename1', 'servicename2']]);
+            var pause = sc.pause([['servicename1', 'servicename2']]);
 
             expect(pause).to.deep.equal(buildControlCommand('pause', [
                 buildCommand([ 'pause', 'servicename1' ], 'servicename1'),
@@ -116,22 +118,22 @@ describe('command', function() {
 
         it('should be valid with all args', function() {
 
-            var pause = command.pause(['myserver', 'servicename', { serial: true }]);
+            var pause = sc.pause(['myserver', 'servicename', { serial: true }]);
 
             expect(pause).to.deep.equal(buildControlCommand('pause', [
-                buildCommand([ '\\\\myserver', 'pause', 'servicename' ], 'servicename')
-            ], 'myserver', true));
+                buildCommand([ '\\\\myserver', 'pause', 'servicename' ], 'servicename', null, 'myserver')
+            ], 'myserver', { serial: true }));
 
         });
 
         it('should be valid with all args and multiple services', function() {
 
-            var pause = command.pause(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
+            var pause = sc.pause(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
 
             expect(pause).to.deep.equal(buildControlCommand('pause', [
-                buildCommand([ '\\\\myserver', 'pause', 'servicename1' ], 'servicename1'),
-                buildCommand([ '\\\\myserver', 'pause', 'servicename2' ], 'servicename2')
-            ], 'myserver', true));
+                buildCommand([ '\\\\myserver', 'pause', 'servicename1' ], 'servicename1', null, 'myserver'),
+                buildCommand([ '\\\\myserver', 'pause', 'servicename2' ], 'servicename2', null, 'myserver')
+            ], 'myserver', { serial: true }));
 
         });
 
@@ -141,7 +143,7 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            var cont = command.continue(['servicename']);
+            var cont = sc.continue(['servicename']);
 
             expect(cont).to.deep.equal(buildControlCommand('continue', [
                 buildCommand([ 'continue', 'servicename' ], 'servicename')
@@ -151,7 +153,7 @@ describe('command', function() {
 
         it('should be valid with minimal args and multiple services', function() {
 
-            var cont = command.continue([['servicename1', 'servicename2']]);
+            var cont = sc.continue([['servicename1', 'servicename2']]);
 
             expect(cont).to.deep.equal(buildControlCommand('continue', [
                 buildCommand([ 'continue', 'servicename1' ], 'servicename1'),
@@ -162,22 +164,22 @@ describe('command', function() {
 
         it('should be valid with all args', function() {
 
-            var cont = command.continue(['myserver', 'servicename', { serial: true }]);
+            var cont = sc.continue(['myserver', 'servicename', { serial: true }]);
 
             expect(cont).to.deep.equal(buildControlCommand('continue', [
-                buildCommand([ '\\\\myserver', 'continue', 'servicename' ], 'servicename')
-            ], 'myserver', true));
+                buildCommand([ '\\\\myserver', 'continue', 'servicename' ], 'servicename', null, 'myserver')
+            ], 'myserver', { serial: true }));
 
         });
 
         it('should be valid with all args and multiple services', function() {
 
-            var cont = command.continue(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
+            var cont = sc.continue(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
 
             expect(cont).to.deep.equal(buildControlCommand('continue', [
-                buildCommand([ '\\\\myserver', 'continue', 'servicename1' ], 'servicename1'),
-                buildCommand([ '\\\\myserver', 'continue', 'servicename2' ], 'servicename2')
-            ], 'myserver', true));
+                buildCommand([ '\\\\myserver', 'continue', 'servicename1' ], 'servicename1', null, 'myserver'),
+                buildCommand([ '\\\\myserver', 'continue', 'servicename2' ], 'servicename2', null, 'myserver')
+            ], 'myserver', { serial: true }));
 
         });
 
@@ -187,7 +189,7 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            var stop = command.stop(['servicename']);
+            var stop = sc.stop(['servicename']);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
                 buildCommand([ 'stop', 'servicename' ], 'servicename', [ 1062 ])
@@ -197,7 +199,7 @@ describe('command', function() {
 
         it('should be valid with minimal args and multiple services', function() {
 
-            var stop = command.stop([['servicename1', 'servicename2']]);
+            var stop = sc.stop([['servicename1', 'servicename2']]);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
                 buildCommand([ 'stop', 'servicename1' ], 'servicename1', [ 1062 ]),
@@ -208,22 +210,22 @@ describe('command', function() {
 
         it('should be valid with all args', function() {
 
-            var stop = command.stop(['myserver', 'servicename', { serial: true }]);
+            var stop = sc.stop(['myserver', 'servicename', { serial: true, waitForExit: true }]);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
-                buildCommand([ '\\\\myserver', 'stop', 'servicename' ], 'servicename', [ 1062 ])
-            ], 'myserver', true));
+                buildCommand([ '\\\\myserver', 'stop', 'servicename' ], 'servicename', [ 1062 ], 'myserver')
+            ], 'myserver', { serial: true, waitForExit: true }));
 
         });
 
         it('should be valid with all args and multiple services', function() {
 
-            var stop = command.stop(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
+            var stop = sc.stop(['myserver', ['servicename1', 'servicename2'], { serial: true, waitForExit: true }]);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
-                buildCommand([ '\\\\myserver', 'stop', 'servicename1' ], 'servicename1', [ 1062 ]),
-                buildCommand([ '\\\\myserver', 'stop', 'servicename2' ], 'servicename2', [ 1062 ])
-            ], 'myserver', true));
+                buildCommand([ '\\\\myserver', 'stop', 'servicename1' ], 'servicename1', [ 1062 ], 'myserver'),
+                buildCommand([ '\\\\myserver', 'stop', 'servicename2' ], 'servicename2', [ 1062 ], 'myserver')
+            ], 'myserver', { serial: true, waitForExit: true }));
 
         });
 
@@ -233,14 +235,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.control(['servicename', 'paramchange'])).to.deep.equal(
+            expect(sc.control(['servicename', 'paramchange'])).to.deep.equal(
                 buildCommand([ 'control', 'servicename', 'paramchange' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.control(['myserver', 'servicename', 'paramchange'])).to.deep.equal(
+            expect(sc.control(['myserver', 'servicename', 'paramchange'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'control', 'servicename', 'paramchange' ]));
 
         });
@@ -251,14 +253,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.interrogate(['servicename'])).to.deep.equal(
+            expect(sc.interrogate(['servicename'])).to.deep.equal(
                 buildCommand([ 'interrogate', 'servicename' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.interrogate(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.interrogate(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'interrogate', 'servicename' ]));
 
         });
@@ -271,14 +273,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.create(['servicename', { type: 'own' }])).to.deep.equal(
+            expect(sc.create(['servicename', { type: 'own' }])).to.deep.equal(
                 buildCommand([ 'create', 'servicename', 'type=', 'own' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.create(['myserver', 'servicename', {
+            expect(sc.create(['myserver', 'servicename', {
                 type: 'interact', 
                 interact: 'share',
                 start: 'boot',
@@ -313,14 +315,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.getDisplayName(['servicename'])).to.deep.equal(
+            expect(sc.getDisplayName(['servicename'])).to.deep.equal(
                 buildCommand([ 'getdisplayname', 'servicename', '4096' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.getDisplayName(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.getDisplayName(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'getdisplayname', 'servicename', '4096' ]));
 
         });
@@ -331,14 +333,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.getKeyName(['servicename'])).to.deep.equal(
+            expect(sc.getKeyName(['servicename'])).to.deep.equal(
                 buildCommand([ 'getkeyname', 'servicename', '4096' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.getKeyName(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.getKeyName(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'getkeyname', 'servicename', '4096' ]));
 
         });
@@ -349,14 +351,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.getDescription(['servicename'])).to.deep.equal(
+            expect(sc.getDescription(['servicename'])).to.deep.equal(
                 buildCommand([ 'qdescription', 'servicename', '8192' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.getDescription(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.getDescription(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'qdescription', 'servicename', '8192' ]));
 
         });
@@ -367,14 +369,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.setDescription(['servicename', 'Some description.'])).to.deep.equal(
+            expect(sc.setDescription(['servicename', 'Some description.'])).to.deep.equal(
                 buildCommand([ 'description', 'servicename', 'Some description.' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.setDescription(['myserver', 'servicename', 'Some description.'])).to.deep.equal(
+            expect(sc.setDescription(['myserver', 'servicename', 'Some description.'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'description', 'servicename', 'Some description.' ]));
 
         });
@@ -385,14 +387,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.getDependencies(['servicename'])).to.deep.equal(
+            expect(sc.getDependencies(['servicename'])).to.deep.equal(
                 buildCommand([ 'enumdepend', 'servicename', '262144' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.getDependencies(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.getDependencies(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'enumdepend', 'servicename', '262144' ]));
 
         });
@@ -403,14 +405,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.getDescriptor(['servicename'])).to.deep.equal(
+            expect(sc.getDescriptor(['servicename'])).to.deep.equal(
                 buildCommand([ 'sdshow', 'servicename' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.getDescriptor(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.getDescriptor(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'sdshow', 'servicename' ]));
 
         });
@@ -421,14 +423,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.setDescriptor(['servicename', 'ServiceSecurityDescriptor'])).to.deep.equal(
+            expect(sc.setDescriptor(['servicename', 'ServiceSecurityDescriptor'])).to.deep.equal(
                 buildCommand([ 'sdset', 'servicename', 'ServiceSecurityDescriptor' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.setDescriptor(['myserver', 'servicename', 'ServiceSecurityDescriptor'])).to.deep.equal(
+            expect(sc.setDescriptor(['myserver', 'servicename', 'ServiceSecurityDescriptor'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'sdset', 'servicename', 'ServiceSecurityDescriptor' ]));
 
         });
@@ -439,14 +441,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.getConfig(['servicename'])).to.deep.equal(
+            expect(sc.getConfig(['servicename'])).to.deep.equal(
                 buildCommand([ 'qc', 'servicename', '8192' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.getConfig(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.getConfig(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'qc', 'servicename', '8192' ]));
 
         });
@@ -457,14 +459,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.setConfig(['servicename', { type: 'own' }])).to.deep.equal(
+            expect(sc.setConfig(['servicename', { type: 'own' }])).to.deep.equal(
                 buildCommand([ 'config', 'servicename', 'type=', 'own' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.setConfig(['myserver', 'servicename', {
+            expect(sc.setConfig(['myserver', 'servicename', {
                 type: 'interact', 
                 interact: 'share',
                 start: 'boot',
@@ -499,14 +501,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.getFailureConfig(['servicename'])).to.deep.equal(
+            expect(sc.getFailureConfig(['servicename'])).to.deep.equal(
                 buildCommand([ 'qfailure', 'servicename', '8192' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.getFailureConfig(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.getFailureConfig(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'qfailure', 'servicename', '8192' ]));
 
         });
@@ -517,14 +519,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.setFailureConfig(['servicename', { reset: 30 }])).to.deep.equal(
+            expect(sc.setFailureConfig(['servicename', { reset: 30 }])).to.deep.equal(
                 buildCommand([ 'failure', 'servicename', 'reset=', '30' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.setFailureConfig(['myserver', 'servicename', {
+            expect(sc.setFailureConfig(['myserver', 'servicename', {
                 reset: 30, 
                 reboot: 'Broadcast message',  
                 command: 'path/to/failure.exe',
@@ -549,21 +551,21 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.query()).to.deep.equal(
+            expect(sc.query()).to.deep.equal(
                 buildCommand([ 'queryex', 'bufsize=', '262144' ]));
 
         });
 
         it('should be valid with server and minimal args', function() {
 
-            expect(command.query(['myserver'])).to.deep.equal(
+            expect(sc.query(['myserver'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'queryex', 'bufsize=', '262144' ]));
 
         });
 
         it('should not include args if service name is specified', function() {
 
-            expect(command.query(['myserver', {
+            expect(sc.query(['myserver', {
                 name: 'servicename',
                 class: 'service', 
                 type: 'interact', 
@@ -576,7 +578,7 @@ describe('command', function() {
 
         it('should be specify all args when service name is not specified', function() {
 
-            expect(command.query(['myserver', {
+            expect(sc.query(['myserver', {
                 class: 'service', 
                 type: 'interact', 
                 state: 'inactive',  
@@ -598,14 +600,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.delete(['servicename'])).to.deep.equal(
+            expect(sc.delete(['servicename'])).to.deep.equal(
                 buildCommand([ 'delete', 'servicename' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.delete(['myserver', 'servicename'])).to.deep.equal(
+            expect(sc.delete(['myserver', 'servicename'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'delete', 'servicename' ]));
 
         });
@@ -618,14 +620,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.lock()).to.deep.equal(
+            expect(sc.lock()).to.deep.equal(
                 buildCommand([ 'lock' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.lock(['myserver'])).to.deep.equal(
+            expect(sc.lock(['myserver'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'lock' ]));
 
         });
@@ -636,14 +638,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.getLock()).to.deep.equal(
+            expect(sc.getLock()).to.deep.equal(
                 buildCommand([ 'querylock' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.getLock(['myserver'])).to.deep.equal(
+            expect(sc.getLock(['myserver'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'querylock' ]));
 
         });
@@ -654,14 +656,14 @@ describe('command', function() {
 
         it('should be valid with minimal args', function() {
 
-            expect(command.setBoot(['ok'])).to.deep.equal(
+            expect(sc.setBoot(['ok'])).to.deep.equal(
                 buildCommand([ 'boot', 'ok' ]));
 
         });
 
         it('should be valid with all args', function() {
 
-            expect(command.setBoot(['myserver', 'ok'])).to.deep.equal(
+            expect(sc.setBoot(['myserver', 'ok'])).to.deep.equal(
                 buildCommand([ '\\\\myserver', 'boot', 'ok' ]));
 
         });

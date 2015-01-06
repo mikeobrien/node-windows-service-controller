@@ -40,6 +40,7 @@ All `sc` commands are fully supported by this module.
 
 - [Control Commands](#control-commands)
   - [Timeout](#timeout)
+  - [Poll Interval](#poll-interval)
   - [Start](#start)
   - [Pause](#pause)
   - [Continue](#continue)
@@ -78,17 +79,31 @@ Sets the timeout for control commands. Default is 30 seconds.
 sc.timeout(120);
 ```
 
+### Poll Interval
+
+Sets the poll interval for checking the state of the service. Default is 1 second.
+
+```js
+sc.pollInterval(5);
+```
+
 ### Start
 
 Starts a service or services. Resolves the promise when the *all* the services specified are running or rejects it if it timed out. *Server name and service arguments are optional.*
 
 ```js
 sc.start('ServerName', 'ServiceName', {
+        // Arguments to pass into the service.
         args: ['ServiceArg1', 'ServiceArg2']
     });
 
 
 sc.start('ServerName', ['ServiceName1', 'ServiceName2'], {
+
+        // Starts services serially. By default services are started in parallel.
+        serial: true|false,
+
+        // Arguments to pass into the services.
         args: ['ServiceArg1', 'ServiceArg2']
     });
 ```
@@ -100,7 +115,10 @@ Sends a PAUSE control request to a service or services. Resolves the promise whe
 ```js
 sc.pause('ServerName', 'ServiceName');
 
-sc.pause('ServerName', ['ServiceName1', 'ServiceName2']);
+sc.pause('ServerName', ['ServiceName1', 'ServiceName2'], {
+        // Pauses services serially. By default services are paused in parallel.
+        serial: true|false
+    });
 ```
 
 ### Continue
@@ -110,17 +128,40 @@ Sends a CONTINUE control request to a service or services in order to resume a p
 ```js
 sc.continue('ServerName', 'ServiceName');
 
-sc.continue('ServerName', ['ServiceName1', 'ServiceName2']);
+sc.continue('ServerName', ['ServiceName1', 'ServiceName2'], {
+        // Starts services serially. By default services are started in parallel.
+        serial: true|false
+    });
 ```
 
 ### Stop
 
-Sends a STOP control request to a service or services. Resolves the promise when *all* the services specified are stopped or rejects it if it timed out. *Server name is optional.*
+Sends a STOP control request to a service or services. Resolves the promise when *all* the services specified are stopped or rejects it if it timed out.  *Server name and flags are optional.*
+
+*Note:* By default this method waits for the service(s) to be in a stopped state. Even though a service is in a stopped state, the service process itself can still be running. This can happen if it takes some time for the service process to terminate after all it's services have been stopped or if the service process hosts other services that are in a running state. To wait for the service process to terminate, instead of waiting for the service(s) to stop, use the `waitForExit` flag below.
 
 ```js
-sc.stop('ServerName', 'ServiceName');
+sc.stop('ServerName', 'ServiceName', {
+        // Waits for the service process to terminate instead of waiting for the 
+        // service(s) to indicate they've stopped. All services hosted by the 
+        // service process must be stopped for the process to terminate.
+        // This is useful when you need to work with files that are locked
+        // by the service process.
+        waitForExit: true|false
+    });
 
-sc.stop('ServerName', ['ServiceName1', 'ServiceName2']);
+sc.stop('ServerName', ['ServiceName1', 'ServiceName2'], {
+
+        // Stops services serially. By default services are stopped in parallel.
+        serial: true|false,
+
+        // Waits for the service process to terminate instead of waiting for the 
+        // service(s) to indicate they've stopped. All services hosted by the 
+        // service process must be stopped for the process to terminate.
+        // This is useful when you need to work with files that are locked
+        // by the service process.
+        waitForExit: true|false
+    });
 ```
 
 ### Control
@@ -287,16 +328,6 @@ An array of dependencies is passed when the promise is resolved. For more inform
             paused: false,
             stopped: false
         },
-
-        // The control codes the service accepts and processes in its handler function.
-        // See the documentation linked to above for additional flags.
-        // ACCEPT_STOP = 1
-        // ACCEPT_PAUSE_CONTINUE = 2
-        // ACCEPT_SHUTDOWN = 4
-        // ACCEPT_PARAMCHANGE = 8
-        // ACCEPT_NETBINDCHANGE = 16
-        // ACCEPT_PRESHUTDOWN = 256
-        accepted: ['STOPPABLE', 'NOT_PAUSABLE', 'IGNORES_SHUTDOWN'],
 
         // The error code that the service uses to report an error that 
         // occurs when it is starting or stopping. 
@@ -568,9 +599,6 @@ An array of services is passed when the promise is resolved. For more informatio
         // The name of the service.
         name: 'iphlpsvc',
 
-        // The display name of the service.
-        displayName: 'IP Helper',
-
         // The type of service. This member can be one of the following values.
         // KERNEL_DRIVER = 1
         // FILE_SYSTEM_DRIVER = 2
@@ -598,16 +626,6 @@ An array of services is passed when the promise is resolved. For more informatio
             paused: false,
             stopped: false
         },
-
-        // The control codes the service accepts and processes in its handler function.
-        // See the documentation linked to above for additional flags.
-        // ACCEPT_STOP = 1
-        // ACCEPT_PAUSE_CONTINUE = 2
-        // ACCEPT_SHUTDOWN = 4
-        // ACCEPT_PARAMCHANGE = 8
-        // ACCEPT_NETBINDCHANGE = 16
-        // ACCEPT_PRESHUTDOWN = 256
-        accepted: ['STOPPABLE', 'NOT_PAUSABLE', 'IGNORES_SHUTDOWN'],
 
         // The error code that the service uses to report an error that 
         // occurs when it is starting or stopping. 

@@ -1,6 +1,6 @@
 var expect = require('chai').expect,
     cases = require('cases'),
-    parse = require('../src/parser.js');
+    parse = require('../../src/sc-parser');
 
 describe('parser', function() {
 
@@ -121,7 +121,31 @@ describe('parser', function() {
 
     describe('config', function() {
 
-        var output = '[SC] QueryServiceConfig SUCCESS\r\n\r\n' +
+        var output1 = '[SC] QueryServiceConfig SUCCESS\r\n\r\n' +
+            'SERVICE_NAME: Service\r\n' +
+            '        TYPE               : 10  WIN32_OWN_PROCESS\r\n' +
+            '        START_TYPE         : 3   DEMAND_START\r\n' +
+            '        ERROR_CONTROL      : 1   NORMAL\r\n' +
+            '        BINARY_PATH_NAME   : C:\\Temp\\service.exe\r\n' +
+            '        LOAD_ORDER_GROUP   : LoadOrderGroup\r\n' +
+            '        TAG                : 0\r\n' +
+            '        DISPLAY_NAME       : Service\r\n' +
+            '        DEPENDENCIES       :\r\n' +
+            '        SERVICE_START_NAME : NT Authority\\LocalService\r\n';
+
+        var output2 = '[SC] QueryServiceConfig SUCCESS\r\n\r\n' +
+            'SERVICE_NAME: Service\r\n' +
+            '        TYPE               : 10  WIN32_OWN_PROCESS\r\n' +
+            '        START_TYPE         : 3   DEMAND_START\r\n' +
+            '        ERROR_CONTROL      : 1   NORMAL\r\n' +
+            '        BINARY_PATH_NAME   : C:\\Temp\\service.exe\r\n' +
+            '        LOAD_ORDER_GROUP   : \r\n' +
+            '        TAG                : 0\r\n' +
+            '        DISPLAY_NAME       : Service\r\n' +
+            '        DEPENDENCIES       : NSI\r\n' +
+            '        SERVICE_START_NAME : NT Authority\\LocalService\r\n';
+
+        var output3 = '[SC] QueryServiceConfig SUCCESS\r\n\r\n' +
             'SERVICE_NAME: Service\r\n' +
             '        TYPE               : 10  WIN32_OWN_PROCESS\r\n' +
             '        START_TYPE         : 3   DEMAND_START\r\n' +
@@ -135,20 +159,50 @@ describe('parser', function() {
             '                           : Afd\r\n' +
             '        SERVICE_START_NAME : NT Authority\\LocalService\r\n';
 
-        it('should parse failure config', function () {
+        var service1 = {
+            type: { code: 16, name: 'WIN32_OWN_PROCESS' },
+            startType: { code: 3, name: 'DEMAND_START' },
+            errorControl: { code: 1, name: 'NORMAL' },
+            binPath: 'C:\\Temp\\service.exe',
+            loadOrderGroup: 'LoadOrderGroup',
+            tag: 0,
+            displayName: 'Service',
+            dependencies: [],
+            serviceStartName: 'NT Authority\\LocalService'
+        };
+
+        var service2 = {
+            type: { code: 16, name: 'WIN32_OWN_PROCESS' },
+            startType: { code: 3, name: 'DEMAND_START' },
+            errorControl: { code: 1, name: 'NORMAL' },
+            binPath: 'C:\\Temp\\service.exe',
+            loadOrderGroup: '',
+            tag: 0,
+            displayName: 'Service',
+            dependencies: ['NSI'],
+            serviceStartName: 'NT Authority\\LocalService'
+        };
+
+        var service3 = {
+            type: { code: 16, name: 'WIN32_OWN_PROCESS' },
+            startType: { code: 3, name: 'DEMAND_START' },
+            errorControl: { code: 1, name: 'NORMAL' },
+            binPath: 'C:\\Temp\\service.exe',
+            loadOrderGroup: 'LoadOrderGroup',
+            tag: 0,
+            displayName: 'Service',
+            dependencies: ['NSI', 'Tdx', 'Afd'],
+            serviceStartName: 'NT Authority\\LocalService'
+        };
+
+        it('should parse failure config', cases([
+            [ output1, service1 ],
+            [ output2, service2 ],
+            [ output3, service3 ]
+        ], function (output, service) {
             expect(parse.config(output))
-                .to.deep.equal({
-                    type: { code: 16, name: 'WIN32_OWN_PROCESS' },
-                    startType: { code: 3, name: 'DEMAND_START' },
-                    errorControl: { code: 1, name: 'NORMAL' },
-                    binPath: 'C:\\Temp\\service.exe',
-                    loadOrderGroup: 'LoadOrderGroup',
-                    tag: 0,
-                    displayName: 'Service',
-                    dependencies: ['NSI', 'Tdx', 'Afd'],
-                    serviceStartName: 'NT Authority\\LocalService'
-                });
-        });
+                .to.deep.equal(service);
+        }));
 
     });
 

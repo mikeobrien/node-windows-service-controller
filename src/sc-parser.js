@@ -4,7 +4,7 @@ var _ = require('lodash'),
 _.mixin(require('underscore.string').exports());
 
 function getNameValueRegex(name, value, flags) {
-    return new RegExp(escapeRegex(name) + '\\s*[=:]\\s*' + value, flags);
+    return new RegExp(escapeRegex(name) + '\\s*[=:]' + value, flags);
 }
 
 function matchGroupOrDefault(source, regex, defaultValue) {
@@ -19,7 +19,7 @@ function getValue(source, name, defaultValue) {
 
 function getCodeNameValue(source, name, defaultValue) {
     return matchGroupOrDefault(source, 
-        getNameValueRegex(name, '\\d*\\s*(.*)'), defaultValue);
+        getNameValueRegex(name, '\\s*\\d*\\s*(.*)'), defaultValue);
 }
 
 function getFlags(source, name) {
@@ -29,20 +29,20 @@ function getFlags(source, name) {
 
 function getArrayValue(source, name) {
     source = matchGroupOrDefault(source, 
-        new RegExp(escapeRegex(name) + '((\\s*:\\s*.*)*)'));
+        new RegExp(escapeRegex(name) + '((\\s*:.*)*)'));
     if (!source) return [];
     var regex = /\s*:\s*(.*)/g;
     var results = [];
     var match;
     while (match = regex.exec(source)) {
-        results.push(match[1]); 
+        if (match[1]) results.push(match[1]); 
     }
     return results;
 }
 
 function getNumericValue(source, name, hex, defaultValue) {
     var value = matchGroupOrDefault(source, 
-        getNameValueRegex(name, '((0x)?\\d*)'), defaultValue);
+        getNameValueRegex(name, '\\s*((0x)?\\d*)'), defaultValue);
     if (hex && !_.startsWith('0x')) value = '0x' + value;
     return parseInt(value);
 }
@@ -53,7 +53,7 @@ function getHexValue(source, name, defaultValue) {
 
 function getBooleanValue(source, name, defaultValue) {
     return Boolean(matchGroupOrDefault(source, 
-        getNameValueRegex(name, '(true|false)', 'i'), defaultValue));
+        getNameValueRegex(name, '\\s*(true|false)', 'i'), defaultValue));
 }
 
 exports.error = function(output) {

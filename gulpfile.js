@@ -5,7 +5,12 @@ var gulp = require('gulp'),
 gulp.task('default', ['test']);
 
 gulp.task('test', ['lint'], function() {
-    gulp.src('test/*.js', { read: false })
+    gulp.src('test/unit/*.js', { read: false })
+        .pipe(mocha({ reporter: 'spec' }));
+});
+
+gulp.task('acceptance', function() {
+    gulp.src('test/acceptance/*.js', { read: false })
         .pipe(mocha({ reporter: 'spec' }));
 });
 

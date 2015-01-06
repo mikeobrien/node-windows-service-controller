@@ -60,17 +60,17 @@ function buildControlCommand(args, commandName, successCodes) {
     var argsIn = getArgs(args, 2);
     var services = _.isArray(argsIn.args[0]) ? argsIn.args[0] : [ argsIn.args[0] ];
 
-    var command = {
+    var command = _.merge({
         command: commandName,
-        serial: !!argsIn.options.serial,
         commands: services.map(function(service) {
             var argsOut = [ service ];
             if (argsIn.options.args) argsOut.push.apply(argsOut, argsIn.options.args);
             var command = buildCommand(commandName, argsIn.server, argsOut, successCodes);
             command.service = service;
+            if (argsIn.server) command.server = argsIn.server;
             return command;
         })
-    };
+    }, argsIn.options);
     if (argsIn.server) command.server = argsIn.server;
     return command;
 }

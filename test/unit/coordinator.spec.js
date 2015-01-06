@@ -1,7 +1,7 @@
 var expect = require('chai').expect,
     cases = require('cases'),
     Q = require('q'),
-    coordinator = require('../src/coordinator.js');
+    coordinator = require('../../src/coordinator');
 
 describe('coordinator', function() {
 
@@ -96,7 +96,7 @@ describe('coordinator', function() {
                 function(item) {})
                 .done(function() { 
                     expect(results).to.deep.equal([1, 2, 3]);
-                    expect(new Date() - startTime).to.below(110);
+                    expect(new Date() - startTime).to.below(120);
                     done();
                 });
 

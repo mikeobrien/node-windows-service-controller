@@ -1,6 +1,6 @@
 {
   "name": "windows-service-controller",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Windows service controller.",
   "homepage": "https://github.com/mikeobrien/node-windows-service-controller",
   "main": "src/sc.js",
