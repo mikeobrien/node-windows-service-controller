@@ -25,7 +25,7 @@ var pollInterval = 1000;
 
 function runPoll(control, poll, predicate, errorMessage) {
     return coordinator.poll(
-        control.commands, pollInterval, timeout, control.serial,
+        control.commands, pollInterval, timeout.timeout || timeout, control.serial,
         function(command) { return runSc(command); },
         poll, predicate, errorMessage);
 }

@@ -73,7 +73,7 @@ Unlike the rest of the commands, `start`, `pause`, `continue` and `stop` do not 
 
 ### Timeout
 
-Sets the timeout for control commands. Default is 30 seconds.
+Sets the timeout for all control commands. Default is 30 seconds.
 
 ```js
 sc.timeout(120);
@@ -93,12 +93,21 @@ Starts a service or services. Resolves the promise when the *all* the services s
 
 ```js
 sc.start('ServerName', 'ServiceName', {
+
+        // Sets the timeout for this command. Default is 30 seconds.
+        // Overrides the global timeout.
+        timeout: 30,
+
         // Arguments to pass into the service.
         args: ['ServiceArg1', 'ServiceArg2']
     });
 
 
 sc.start('ServerName', ['ServiceName1', 'ServiceName2'], {
+
+        // Sets the timeout for this command. Default is 30 seconds.
+        // Overrides the global timeout.
+        timeout: 30,
 
         // Starts services serially. By default services are started in parallel.
         serial: true|false,
@@ -113,9 +122,19 @@ sc.start('ServerName', ['ServiceName1', 'ServiceName2'], {
 Sends a PAUSE control request to a service or services. Resolves the promise when *all* the services specified are paused or rejects it if it timed out. *Server name is optional.*
 
 ```js
-sc.pause('ServerName', 'ServiceName');
+sc.pause('ServerName', 'ServiceName', {
+
+        // Sets the timeout for this command. Default is 30 seconds.
+        // Overrides the global timeout.
+        timeout: 30
+});
 
 sc.pause('ServerName', ['ServiceName1', 'ServiceName2'], {
+
+        // Sets the timeout for this command. Default is 30 seconds.
+        // Overrides the global timeout.
+        timeout: 30,
+
         // Pauses services serially. By default services are paused in parallel.
         serial: true|false
     });
@@ -126,9 +145,19 @@ sc.pause('ServerName', ['ServiceName1', 'ServiceName2'], {
 Sends a CONTINUE control request to a service or services in order to resume a paused service. Resolves the promise when *all* the services specified are running or rejects it if it timed out. *Server name is optional.*
 
 ```js
-sc.continue('ServerName', 'ServiceName');
+sc.continue('ServerName', 'ServiceName', {
+    
+        // Sets the timeout for this command. Default is 30 seconds.
+        // Overrides the global timeout.
+        timeout: 30
+});
 
 sc.continue('ServerName', ['ServiceName1', 'ServiceName2'], {
+
+        // Sets the timeout for this command. Default is 30 seconds.
+        // Overrides the global timeout.
+        timeout: 30,
+        
         // Starts services serially. By default services are started in parallel.
         serial: true|false
     });
@@ -142,6 +171,11 @@ Sends a STOP control request to a service or services. Resolves the promise when
 
 ```js
 sc.stop('ServerName', 'ServiceName', {
+
+        // Sets the timeout for this command. Default is 30 seconds.
+        // Overrides the global timeout.
+        timeout: 30,
+
         // Waits for the service process to terminate instead of waiting for the 
         // service(s) to indicate they've stopped. All services hosted by the 
         // service process must be stopped for the process to terminate.
@@ -151,6 +185,10 @@ sc.stop('ServerName', 'ServiceName', {
     });
 
 sc.stop('ServerName', ['ServiceName1', 'ServiceName2'], {
+
+        // Sets the timeout for this command. Default is 30 seconds.
+        // Overrides the global timeout.
+        timeout: 30,
 
         // Stops services serially. By default services are stopped in parallel.
         serial: true|false,

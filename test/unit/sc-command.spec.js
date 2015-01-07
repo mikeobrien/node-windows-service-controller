@@ -66,20 +66,20 @@ describe('sc-command', function() {
         it('should be valid with all args', function() {
 
             var start = sc.start(['myserver', 'servicename', {
-                args: ['Service', 'Arguments'], serial: true
+                args: ['Service', 'Arguments'], serial: true, timeout: 500
             }]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
                 buildCommand([ '\\\\myserver', 'start', 'servicename', 'Service', 'Arguments' ], 
                                'servicename', [ 1056 ], 'myserver')
-            ], 'myserver', { args: ['Service', 'Arguments'], serial: true }));
+            ], 'myserver', { args: ['Service', 'Arguments'], serial: true, timeout: 500 }));
 
         });
 
         it('should be valid with all args and multiple services', function() {
 
             var start = sc.start(['myserver', ['servicename1', 'servicename2'], {
-                args: ['Service', 'Arguments'], serial: true
+                args: ['Service', 'Arguments'], serial: true, timeout: 500
             }]);
 
             expect(start).to.deep.equal(buildControlCommand('start', [
@@ -87,7 +87,7 @@ describe('sc-command', function() {
                                'servicename1', [ 1056 ], 'myserver'),
                 buildCommand([ '\\\\myserver', 'start', 'servicename2', 'Service', 'Arguments' ], 
                                'servicename2', [ 1056 ], 'myserver')
-            ], 'myserver', { args: ['Service', 'Arguments'], serial: true }));
+            ], 'myserver', { args: ['Service', 'Arguments'], serial: true, timeout: 500 }));
 
         });
 
@@ -118,22 +118,22 @@ describe('sc-command', function() {
 
         it('should be valid with all args', function() {
 
-            var pause = sc.pause(['myserver', 'servicename', { serial: true }]);
+            var pause = sc.pause(['myserver', 'servicename', { serial: true, timeout: 500 }]);
 
             expect(pause).to.deep.equal(buildControlCommand('pause', [
                 buildCommand([ '\\\\myserver', 'pause', 'servicename' ], 'servicename', null, 'myserver')
-            ], 'myserver', { serial: true }));
+            ], 'myserver', { serial: true, timeout: 500 }));
 
         });
 
         it('should be valid with all args and multiple services', function() {
 
-            var pause = sc.pause(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
+            var pause = sc.pause(['myserver', ['servicename1', 'servicename2'], { serial: true, timeout: 500 }]);
 
             expect(pause).to.deep.equal(buildControlCommand('pause', [
                 buildCommand([ '\\\\myserver', 'pause', 'servicename1' ], 'servicename1', null, 'myserver'),
                 buildCommand([ '\\\\myserver', 'pause', 'servicename2' ], 'servicename2', null, 'myserver')
-            ], 'myserver', { serial: true }));
+            ], 'myserver', { serial: true, timeout: 500 }));
 
         });
 
@@ -164,22 +164,22 @@ describe('sc-command', function() {
 
         it('should be valid with all args', function() {
 
-            var cont = sc.continue(['myserver', 'servicename', { serial: true }]);
+            var cont = sc.continue(['myserver', 'servicename', { serial: true, timeout: 500 }]);
 
             expect(cont).to.deep.equal(buildControlCommand('continue', [
                 buildCommand([ '\\\\myserver', 'continue', 'servicename' ], 'servicename', null, 'myserver')
-            ], 'myserver', { serial: true }));
+            ], 'myserver', { serial: true, timeout: 500 }));
 
         });
 
         it('should be valid with all args and multiple services', function() {
 
-            var cont = sc.continue(['myserver', ['servicename1', 'servicename2'], { serial: true }]);
+            var cont = sc.continue(['myserver', ['servicename1', 'servicename2'], { serial: true, timeout: 500 }]);
 
             expect(cont).to.deep.equal(buildControlCommand('continue', [
                 buildCommand([ '\\\\myserver', 'continue', 'servicename1' ], 'servicename1', null, 'myserver'),
                 buildCommand([ '\\\\myserver', 'continue', 'servicename2' ], 'servicename2', null, 'myserver')
-            ], 'myserver', { serial: true }));
+            ], 'myserver', { serial: true, timeout: 500 }));
 
         });
 
@@ -210,22 +210,23 @@ describe('sc-command', function() {
 
         it('should be valid with all args', function() {
 
-            var stop = sc.stop(['myserver', 'servicename', { serial: true, waitForExit: true }]);
+            var stop = sc.stop(['myserver', 'servicename', { serial: true, waitForExit: true, timeout: 500 }]);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
                 buildCommand([ '\\\\myserver', 'stop', 'servicename' ], 'servicename', [ 1062 ], 'myserver')
-            ], 'myserver', { serial: true, waitForExit: true }));
+            ], 'myserver', { serial: true, waitForExit: true, timeout: 500 }));
 
         });
 
         it('should be valid with all args and multiple services', function() {
 
-            var stop = sc.stop(['myserver', ['servicename1', 'servicename2'], { serial: true, waitForExit: true }]);
+            var stop = sc.stop(['myserver', ['servicename1', 'servicename2'], 
+                { serial: true, waitForExit: true, timeout: 500 }]);
 
             expect(stop).to.deep.equal(buildControlCommand('stop', [
                 buildCommand([ '\\\\myserver', 'stop', 'servicename1' ], 'servicename1', [ 1062 ], 'myserver'),
                 buildCommand([ '\\\\myserver', 'stop', 'servicename2' ], 'servicename2', [ 1062 ], 'myserver')
-            ], 'myserver', { serial: true, waitForExit: true }));
+            ], 'myserver', { serial: true, waitForExit: true, timeout: 500 }));
 
         });
 
