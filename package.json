@@ -28,16 +28,19 @@
     "LICENSE"
   ],
   "devDependencies": {
-    "cases": "^0.1.1",
-    "chai": "~1.10.0",
-    "gulp": "~3.8.10",
-    "gulp-jshint": "~1.9.0",
-    "gulp-mocha": "~1.1.1"
+    "cases": "^1.0.0",
+    "chai": "^4.4.1",
+    "gulp": "~4.0.2",
+    "gulp-jshint": "~2.1.0",
+    "gulp-mocha": "~10.0.0"
   },
   "dependencies": {
-    "escape-string-regexp": "^1.0.2",
-    "lodash": "^2.4.1",
-    "q": "^1.1.1",
-    "underscore.string": "^2.4.0"
+    "escape-string-regexp": "^4.0.0",
+    "lodash": "^4.17.21",
+    "q": "^1.5.1",
+    "underscore.string": "^3.3.6"
+  },
+  "volta": {
+    "node": "20.11.0"
   }
 }
